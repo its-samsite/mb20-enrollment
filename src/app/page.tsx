@@ -12,23 +12,27 @@ interface User {
   lastAttendance?: string;
 }
 
+interface AttendanceLog {
+  userId: string;
+  timestamp: string;
+  status: string;
+}
+
 export default function Home() {
   const [users, setUsers] = useState<User[]>([]);
   const [newUser, setNewUser] = useState({ name: '', email: '' });
   const [deviceStatus, setDeviceStatus] = useState<'connected' | 'disconnected'>('disconnected');
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [attendanceLogs, setAttendanceLogs] = useState<any[]>([]);
+  const [attendanceLogs, setAttendanceLogs] = useState<AttendanceLog[]>([]);
 
   useEffect(() => {
     // Initialize socket connection for real-time data
     const socketConnection = io();
-    setSocket(socketConnection);
 
     socketConnection.on('connect', () => {
       console.log('Connected to server');
     });
 
-    socketConnection.on('attendance_data', (data) => {
+    socketConnection.on('attendance_data', (data: AttendanceLog) => {
       setAttendanceLogs(prev => [...prev, data]);
       // Update user's last attendance
       setUsers(prev => prev.map(user => 
@@ -38,7 +42,7 @@ export default function Home() {
       ));
     });
 
-    socketConnection.on('device_status', (status) => {
+    socketConnection.on('device_status', (status: 'connected' | 'disconnected') => {
       setDeviceStatus(status);
     });
 
@@ -56,7 +60,7 @@ export default function Home() {
         ));
         alert('User enrollment initiated. Please place finger/face on device.');
       }
-    } catch (error) {
+    } catch {
       alert('Enrollment failed. Check device connection.');
     }
   };
@@ -79,7 +83,7 @@ export default function Home() {
     try {
       const response = await axios.get('/api/device-status');
       setDeviceStatus(response.data.connected ? 'connected' : 'disconnected');
-    } catch (error) {
+    } catch {
       setDeviceStatus('disconnected');
     }
   };

@@ -14,7 +14,7 @@ export async function GET() {
       port: devicePort 
     });
     
-  } catch (error) {
+  } catch {
     return NextResponse.json({ connected: false }, { status: 500 });
   }
 }
